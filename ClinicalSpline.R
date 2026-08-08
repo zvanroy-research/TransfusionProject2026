@@ -1,5 +1,5 @@
 # ==============================================================================
-# CONTINUOUS NON-LINEAR TRANSFUSION-ASSOCIATED RISK ENGINE
+# CONTINUOUS NON-LINEAR TRANSFUSION-ASSOCIATED RISK
 # Model: Time-Varying Cox Regression with Natural Cubic Splines (df = 3)
 # Output: Adjusted Hazard Ratio Curve Relative to 0 Transfused Units
 # ==============================================================================
@@ -14,7 +14,7 @@ library(scales)
 library(cowplot)
 
 # ------------------------------------------------------------------------------
-# 1. FILE PATHS & DATA INGESTION
+# 1. FILE PATHS & DATA
 # ------------------------------------------------------------------------------
 file_path <- "/Users/zvr/Downloads/Transfusion_Data.xlsx"
 cut_path  <- "/Users/zvr/Downloads/Cuttoffs.xlsx"
@@ -47,7 +47,7 @@ df_patients_clean <- df_demo_raw %>%
   select(pat_id, listing_date, age_at_listing, sex)
 
 # ------------------------------------------------------------------------------
-# 3. LAB MATRIX & EVENT DEFINITIONS (CLINICAL FLOORS: 3000 MHC-I / 1500 MHC-II)
+# 3. EVENT DEFINITIONS (CLINICAL FLOORS: 3000 MHC-I / 1500 MHC-II)
 # ------------------------------------------------------------------------------
 df_first_positive_mfi <- bind_rows(
   df_mhc1_raw %>% 
