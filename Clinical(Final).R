@@ -31,7 +31,7 @@ df_mhc1_raw   <- read_excel(file_path, sheet = "Luminex Confirmation MHC-I")
 df_mhc2_raw   <- read_excel(file_path, sheet = "Luminex Confirmation MHC-II")
 
 # ==============================================================================
-# 2. DEMOGRAPHIC CLEANING & DISCIPLINED EXCLUSIONS
+# 2. DEMOGRAPHIC CLEANING & EXCLUSIONS
 # ==============================================================================
 descriptions_to_exclude <- c(
   "Kidney Living Donor", "HSC Donor", "Disease Association",
@@ -51,7 +51,7 @@ df_patients_clean <- df_demo_raw %>%
   select(pat_id, listing_date, age_at_listing, sex)
 
 # ==============================================================================
-# 3. LAB MATRIX ENGINE: KINETIC ENDPOINTS (STATIC CLINICAL FLOORS)
+# 3. ENDPOINTS (STATIC CLINICAL FLOORS)
 # ==============================================================================
 message("Processing Luminex matrix using institutional clinical floors (3000 Class I / 1500 Class II)...")
 
@@ -80,7 +80,7 @@ df_last_lab_mfi <- bind_rows(
   ungroup()
 
 # ==============================================================================
-# 4. RETROSPECTIVE IMMUNOLOGICAL PRIMING HISTORY
+# 4. RETROSPECTIVE IMMUNOLOGICAL HISTORY
 # ==============================================================================
 message("Reconstructing pre-listing historical events...")
 df_baseline_history <- df_events_raw %>%
@@ -103,7 +103,7 @@ df_waitlist_endpoints <- df_events_raw %>%
   ungroup()
 
 # ==============================================================================
-# 5. TIME-VARYING GRANULAR VOLUMETRIC COUNT ENGINE
+# 5. TIME-VARYING VOLUMETRIC COUNT 
 # ==============================================================================
 message("Compiling longitudinal transfusion record arrays...")
 df_trans_clean <- df_trans_raw %>%
@@ -118,7 +118,7 @@ df_trans_clean <- df_trans_raw %>%
   select(pat_id, trans_day, cum_units)
 
 # ==============================================================================
-# 6. ASSEMBLE MODEL INTEGRATION MATRIX WITH METHODOLOGICAL RECONCILIATION
+# 6.  MODEL INTEGRATION
 # ==============================================================================
 study_freeze_date <- max(c(df_patients_clean$listing_date, df_waitlist_endpoints$removal_date, df_last_lab_mfi$last_draw_date), na.rm = TRUE)
 
@@ -151,7 +151,7 @@ df_master_base <- df_patients_clean %>%
   filter(!is.na(end_day) & end_day > 0)
 
 # ==============================================================================
-# 7. PARSE LONG TIME-DEPENDENT COVARIATE MATRICES
+# 7. TIME-DEPENDENT MATRICES
 # ==============================================================================
 df_long_base <- tmerge(data1 = df_master_base, data2 = df_master_base, id = pat_id, tstart = 0, tstop = end_day)
 df_long_base <- tmerge(data1 = df_long_base, data2 = df_master_base, id = pat_id, event = event(end_day, status))
@@ -169,7 +169,7 @@ df_long_binned <- tmerge(
   )
 
 # ==============================================================================
-# 8. EXECUTE STATISTICAL REGRESSION ARC (UNADJUSTED vs ADJUSTED)
+# 8. STATISTICAL REGRESSION (UNADJUSTED vs ADJUSTED)
 # ==============================================================================
 cat("\n======================================================================\n")
 cat("       VOLUMETRIC TRANSFUSION SURVIVAL MODELS (CLINICAL CUTOFFS)      \n")
@@ -188,7 +188,7 @@ fit_stage2c <- coxph(
 print(summary(fit_stage2c))
 
 # ==============================================================================
-# 9. DUAL-PANEL PUBLICATION DASHBOARD (UNEXPOSED LINE FORCED ON TOP)
+# 9. DUAL-PANEL FIGURE
 # ==============================================================================
 library(ggplot2)
 library(dplyr)
@@ -325,7 +325,7 @@ plot_s2 <- ggplot(df_plot_s2, aes(x = time, y = incidence, color = Group, group 
   )
 
 # ------------------------------------------------------------------------------
-# 4. COMPILE VIEWPORT & SAVE PUBLICATION FILES
+# 4. COMPILE & SAVE PUBLICATION FILES
 # ------------------------------------------------------------------------------
 plot_for_legend <- ggplot(df_plot_s1, aes(x = time, y = incidence, color = Group)) +
   geom_step() +
